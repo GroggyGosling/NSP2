@@ -5,23 +5,27 @@ from reader import ReadData
 
 class FitLinearData():
 
-    def __init__(self):
-        self.pulse_height = np.array([0,3,8]) #mV
-        self.theoretical_pulse_height = np.array([0,1,2]) #mV
+    def __init__(self, c, c_err):
+        self.pulse_height = [c[2], c[0], c[3], c[1]]
+        self.pulse_height_err = [c_err[2], c_err[0], c_err[3], c_err[1]]
+        self.theoretical_pulse_height = [135, 330, 511, 1275]
 
-    def linear_func(self, x,a,b):
-        self.y = a*x + b
+    def linear_func(self, x,a, b):
+        return a*x + b
 
     def linear_fit(self):
-        model = Model(self.y)
-        self.result = model.fit(self.pulse_height,x = self.theoretical_pulse_height, a = 3.86, b = 0)
-        print(self.result.fit_report())
+        model = Model(self.linear_func)
+        self.result = model.fit(self.theoretical_pulse_height, x = self.pulse_height, weights = self.pulse_height_err, a = 3.86, b = -90)
+        print(self.result.fit_report()) 
+
+        return self.result.params['a'].value, self.result.params['a'].stderr, self.result.params['b'].value, self.result.params['b'].stderr
 
     def plot_linear_fit(self):
-        plt.plot(self.theoretical_pulse_height, self.result.best_fit)
+        plt.scatter(self.pulse_height, self.theoretical_pulse_height)
+        plt.plot(self.pulse_height, self.result.best_fit)
         plt.show()
 
-class FitQuadraticData():
+class FitGaussianData():
 
     def __init__(self, pulseheight_CS, counts_CS, pulseheight_NA, counts_NA, pulseheight_background, counts_background):
         self.pulseheight_CS137 = pulseheight_CS
@@ -37,32 +41,36 @@ class FitQuadraticData():
         self.maximum_CS137_1_pulseheight = []
         self.maximum_CS137_2_pulseheight = []
         self.maximum_NA22_1_pulseheight = []
-        self.maximum_NA22_2_pulseheight = []
+        self.maximum_NA22_2_pulseheight = [] 
+        self.fit_c = []
+        self.fit_c_error = []
 
-    def quadratic_func(self, x, a, b, c, sigma):
+    def gaussian_func(self, x, a, b, c, sigma):
         return a * np.exp(-(x - c) ** 2 / (2 * sigma ** 2)) + b
     
-    def quadratic_fit(self):
-        model = Model(self.quadratic_func)
+    def gaussian_fit(self):
+        model = Model(self.gaussian_func)
         self.result_NA22_1 = model.fit(self.maximum_NA22_1, x = self.maximum_NA22_1_pulseheight, a = 20 , b = 1150, c = 136, sigma = 1)
+        self.fit_c.append(self.result_NA22_1.params['c'].value)
+        self.fit_c_error.append(self.result_NA22_1.params['c'].stderr/np.sqrt(np.sum(self.maximum_NA22_1)))
         print(self.result_NA22_1.fit_report())
-        plt.plot(self.maximum_NA22_1_pulseheight, self.result_NA22_1.best_fit)
-        plt.show()
 
         self.result_NA22_2 = model.fit(self.maximum_NA22_2, x = self.maximum_NA22_2_pulseheight, a = 1 , b = 140, c = 328, sigma = 1)
+        self.fit_c.append(self.result_NA22_2.params['c'].value)
+        self.fit_c_error.append(self.result_NA22_2.params['c'].stderr/np.sqrt(np.sum(self.maximum_NA22_2)))
         print(self.result_NA22_2.fit_report())
-        plt.plot(self.maximum_NA22_2_pulseheight, self.result_NA22_2.best_fit)
-        plt.show()
 
         self.result_CS137_1 = model.fit(self.maximum_CS137_1, x = self.maximum_CS137_1_pulseheight, a = 10 , b = 900, c = 55, sigma = 1)
+        self.fit_c.append(self.result_CS137_1.params['c'].value)
+        self.fit_c_error.append(self.result_CS137_1.params['c'].stderr/np.sqrt(np.sum(self.maximum_CS137_1)))
         print(self.result_CS137_1.fit_report())
-        plt.plot(self.maximum_CS137_1_pulseheight, self.result_CS137_1.best_fit)
-        plt.show()
 
         self.result_CS137_2 = model.fit(self.maximum_CS137_2, x = self.maximum_CS137_2_pulseheight, a = 10 , b = 2250, c = 170, sigma = 1)
+        self.fit_c.append(self.result_CS137_2.params['c'].value)
+        self.fit_c_error.append(self.result_CS137_2.params['c'].stderr/np.sqrt(np.sum(self.maximum_CS137_2)))
         print(self.result_CS137_2.fit_report())
-        plt.plot(self.maximum_CS137_2_pulseheight, self.result_CS137_2.best_fit)
-        plt.show()
+    
+        return self.fit_c, self.fit_c_error
     
     def select_maximum(self):
         i = 0
@@ -100,8 +108,13 @@ class FitQuadraticData():
 
 reader = ReadData()
 a,b,c,d,e,f = reader.read_data()
-finder = FitQuadraticData(a,b,c,d,e,f)
+gaussian = FitGaussianData(a,b,c,d,e,f)
 
-finder.select_maximum()
-finder.quadratic_fit()
+gaussian.select_maximum()
+c, c_err = gaussian.gaussian_fit()
+
+linear = FitLinearData(c, c_err)
+print(linear.linear_fit())
+linear.plot_linear_fit()
+
 
