@@ -2,13 +2,14 @@ from lmfit import Model
 import matplotlib.pyplot as plt
 import numpy as np
 from reader import ReadData
+import csv
 
 class FitLinearData():
 
     def __init__(self, c, c_err):
         self.pulse_height = [c[2], c[0], c[3], c[1]]
         self.pulse_height_err = [c_err[2], c_err[0], c_err[3], c_err[1]]
-        self.theoretical_pulse_height = [135, 330, 511, 1275]
+        self.theoretical_pulse_height = [180, 511, 662, 1275]
 
     def linear_func(self, x,a, b):
         return a*x + b
@@ -50,20 +51,20 @@ class FitGaussianData():
     
     def gaussian_fit(self):
         model = Model(self.gaussian_func)
-        self.result_NA22_1 = model.fit(self.maximum_NA22_1, x = self.maximum_NA22_1_pulseheight, a = 20 , b = 1150, c = 136, sigma = 1)
-        self.fit_c.append(self.result_NA22_1.params['c'].value)
-        self.fit_c_error.append(self.result_NA22_1.params['c'].stderr/np.sqrt(np.sum(self.maximum_NA22_1)))
-        print(self.result_NA22_1.fit_report())
+        # self.result_NA22_1 = model.fit(self.maximum_NA22_1, x = self.maximum_NA22_1_pulseheight, a = 20 , b = 1150, c = 136, sigma = 1)
+        # self.fit_c.append(self.result_NA22_1.params['c'].value)
+        # self.fit_c_error.append(self.result_NA22_1.params['c'].stderr/np.sqrt(np.sum(self.maximum_NA22_1)))
+        # print(self.result_NA22_1.fit_report())
 
-        self.result_NA22_2 = model.fit(self.maximum_NA22_2, x = self.maximum_NA22_2_pulseheight, a = 1 , b = 140, c = 328, sigma = 1)
-        self.fit_c.append(self.result_NA22_2.params['c'].value)
-        self.fit_c_error.append(self.result_NA22_2.params['c'].stderr/np.sqrt(np.sum(self.maximum_NA22_2)))
-        print(self.result_NA22_2.fit_report())
+        # self.result_NA22_2 = model.fit(self.maximum_NA22_2, x = self.maximum_NA22_2_pulseheight, a = 1 , b = 140, c = 328, sigma = 1)
+        # self.fit_c.append(self.result_NA22_2.params['c'].value)
+        # self.fit_c_error.append(self.result_NA22_2.params['c'].stderr/np.sqrt(np.sum(self.maximum_NA22_2)))
+        # print(self.result_NA22_2.fit_report())
 
-        self.result_CS137_1 = model.fit(self.maximum_CS137_1, x = self.maximum_CS137_1_pulseheight, a = 10 , b = 900, c = 55, sigma = 1)
-        self.fit_c.append(self.result_CS137_1.params['c'].value)
-        self.fit_c_error.append(self.result_CS137_1.params['c'].stderr/np.sqrt(np.sum(self.maximum_CS137_1)))
-        print(self.result_CS137_1.fit_report())
+        # self.result_CS137_1 = model.fit(self.maximum_CS137_1, x = self.maximum_CS137_1_pulseheight, a = 10 , b = 900, c = 55, sigma = 1)
+        # self.fit_c.append(self.result_CS137_1.params['c'].value)
+        # self.fit_c_error.append(self.result_CS137_1.params['c'].stderr/np.sqrt(np.sum(self.maximum_CS137_1)))
+        # print(self.result_CS137_1.fit_report())
 
         self.result_CS137_2 = model.fit(self.maximum_CS137_2, x = self.maximum_CS137_2_pulseheight, a = 10 , b = 2250, c = 170, sigma = 1)
         self.fit_c.append(self.result_CS137_2.params['c'].value)
@@ -99,22 +100,83 @@ class FitGaussianData():
         plt.show()
         plt.plot(self.pulseheight_background, self.counts_background)
         plt.show()
+
+class compton():
+
+    def __init__(self):
+        self.file_compton1 = open('NSP2\\compton1.csv', 'r')
+        self.pulseheight_compton1 = []
+        self.counts_compton1 = []
+        self.file_compton2 = open('NSP2\\compton2.csv', 'r')
+        self.pulseheight_compton2 = []
+        self.counts_compton2 = []
+
+        csvreader = csv.reader(self.file_compton1)
+        for row in csvreader:
+            self.pulseheight_compton1.append(int(float(row[0])))
+            self.counts_compton1.append(int(float(row[1])))
+        csvreader = csv.reader(self.file_compton2)
+        for row in csvreader:
+            self.pulseheight_compton2.append(int(float(row[0])))
+            self.counts_compton2.append(int(float(row[1])))
         
+        subtracted = []
+        for i,j in zip(self.counts_compton2, self.counts_compton1):
+            subtracted.append(j - i)
+        plt.plot(self.pulseheight_compton1, self.counts_compton1, label = 'met object')
+        plt.plot(self.pulseheight_compton2, self.counts_compton2, label = 'zonder object')
+        plt.plot(self.pulseheight_compton2, subtracted, label = 'subtracted')
+        plt.legend()
+        plt.show()
+
+
+    def plot_data(self):
+        plt.plot(self.pulseheight_compton1, self.counts_compton1)
+        plt.show()
+    
+    def gaussian_func(self, x, a, b, c, sigma):
+        return a * np.exp(-(x - c) ** 2 / (2 * sigma ** 2)) + b
+    
+    def select_maximum(self):
+        i = 0
+        self.maximum_compton1 = []
+        self.maximum_compton1_pulseheight = []
+        for x in self.pulseheight_compton1:
+            if x >= 158 and x <= 193:
+                self.maximum_compton1.append(float(self.counts_compton1[i]))
+                self.maximum_compton1_pulseheight.append(float(self.pulseheight_compton1[i]))
+            i += 1
+
+    def gaussian_fit(self):
+        model = Model(self.gaussian_func)
+        self.result_compton1 = model.fit(self.maximum_compton1, x = self.maximum_compton1_pulseheight, a = 10 , b = 400, c = 175, sigma = 1)
+        print(self.result_compton1.fit_report())
+        plt.plot(self.maximum_compton1_pulseheight, self.result_compton1.best_fit)
+        plt.show()
+    
 
 
         
+test = compton()
+# test.plot_data()
+# test.select_maximum()
+# test.gaussian_fit()
+
+
     
-    
 
-reader = ReadData()
-a,b,c,d,e,f = reader.read_data()
-gaussian = FitGaussianData(a,b,c,d,e,f)
+# reader = ReadData()
+# a,b,c,d,e,f = reader.read_data()
+# gaussian = FitGaussianData(a,b,c,d,e,f)
 
-gaussian.select_maximum()
-c, c_err = gaussian.gaussian_fit()
+# gaussian.select_maximum()
+# c, c_err = gaussian.gaussian_fit()
+# gaussian.plot_data()
 
-linear = FitLinearData(c, c_err)
-print(linear.linear_fit())
-linear.plot_linear_fit()
+# linear = FitLinearData(c, c_err)
+# print(linear.linear_fit())
+# linear.plot_linear_fit()
+
+
 
 
