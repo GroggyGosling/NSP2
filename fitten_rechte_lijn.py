@@ -104,12 +104,18 @@ class FitGaussianData():
 class compton():
 
     def __init__(self):
-        self.file_compton1 = open('NSP2\\compton1.csv', 'r')
+        self.file_compton3 = open('edge_30_11.csv', 'r')
+        self.file_compton2 = open('background_20min_30_11.csv', 'r')
+        self.file_compton1 = open('1h_30_11.csv', 'r')
         self.pulseheight_compton1 = []
         self.counts_compton1 = []
-        self.file_compton2 = open('NSP2\\compton2.csv', 'r')
+        
         self.pulseheight_compton2 = []
         self.counts_compton2 = []
+
+        self.pulseheight_compton3 = []
+        self.counts_compton3 = []
+
 
         csvreader = csv.reader(self.file_compton1)
         for row in csvreader:
@@ -118,41 +124,128 @@ class compton():
         csvreader = csv.reader(self.file_compton2)
         for row in csvreader:
             self.pulseheight_compton2.append(int(float(row[0])))
-            self.counts_compton2.append(int(float(row[1])))
-        
+            self.counts_compton2.append(3 * int(float(row[1])))
+        # csvreader = csv.reader(self.file_compton3)
+        # for row in csvreader:
+        #     self.pulseheight_compton3.append(int(float(row[0])))
+        #     self.counts_compton3.append(6 * int(float(row[1])))
+
+        # self.counts_compton1_half = []
+        # self.counts_compton2_half = []
+        # self.pulseheight_compton1_half = []
+        # for i in range(0, 100, 2):
+        #     self.counts_compton1_half.append(self.counts_compton1[i] + self.counts_compton1[i+1])
+        #     self.counts_compton2_half.append(self.counts_compton2[i] + self.counts_compton2[i+1])
+        #     self.pulseheight_compton1_half.append(self.pulseheight_compton1[i])
+        self.background = []
+        for i in self.pulseheight_compton1:
+            self.background.append(np.e**(-0.00810236 * i + 6.96630832))
+
         subtracted = []
-        for i,j in zip(self.counts_compton2, self.counts_compton1):
+        for i,j in zip(self.background, self.counts_compton1):
             subtracted.append(j - i)
+        
+        # subtracted2 = []
+        # for i,j in zip(self.counts_compton2, self.counts_compton3):
+        #     subtracted2.append(j - i)
+        
         plt.plot(self.pulseheight_compton1, self.counts_compton1, label = 'met object')
-        plt.plot(self.pulseheight_compton2, self.counts_compton2, label = 'zonder object')
-        plt.plot(self.pulseheight_compton2, subtracted, label = 'subtracted')
+        # plt.plot(self.pulseheight_compton3, self.counts_compton3, label = 'edge')
+        plt.plot(self.pulseheight_compton2, self.background, label = 'zonder object')
+        plt.plot(self.pulseheight_compton1, subtracted, label = 'subtracted')
+        # plt.plot(self.pulseheight_compton1, subtracted2, label = 'subtracted2')
         plt.legend()
         plt.show()
 
+class lineair_achtergond():
+    def __init__(self):
+        
+        self.file_compton4 = open('background_20min_30_11.csv', 'r')
+        self.file_compton5 = open('1h_30_11.csv', 'r')
 
-    def plot_data(self):
-        plt.plot(self.pulseheight_compton1, self.counts_compton1)
-        plt.show()
-    
-    def gaussian_func(self, x, a, b, c, sigma):
-        return a * np.exp(-(x - c) ** 2 / (2 * sigma ** 2)) + b
-    
+        self.achtergrond_counts = []
+        self.achtergrond_pulseheight = []
+
+        self.pulseheight_compton4 = []
+        self.counts_compton4 = []
+
+        self.pulseheight_compton5 = []
+        self.counts_compton5 = []
+
+        self.counts = []
+        self.pulseheight = []
+
+        csvreader = csv.reader(self.file_compton4)
+        for row in csvreader:
+            self.pulseheight_compton4.append(int(float(row[0])))
+            self.counts_compton4.append(3 * int(float(row[1])))
+
+        csvreader = csv.reader(self.file_compton5)
+        for row in csvreader:
+            self.pulseheight_compton5.append(int(float(row[0])))
+            self.counts_compton5.append(int(float(row[1])))
+
     def select_maximum(self):
         i = 0
-        self.maximum_compton1 = []
-        self.maximum_compton1_pulseheight = []
-        for x in self.pulseheight_compton1:
-            if x >= 158 and x <= 193:
-                self.maximum_compton1.append(float(self.counts_compton1[i]))
-                self.maximum_compton1_pulseheight.append(float(self.pulseheight_compton1[i]))
+        
+        for x in self.pulseheight_compton4:
+
+            if x >= 100 and x <= 160:
+                self.achtergrond_pulseheight.append(float(self.pulseheight_compton4[i]))
+                self.achtergrond_counts.append(float(self.counts_compton4[i]))
             i += 1
 
-    def gaussian_fit(self):
-        model = Model(self.gaussian_func)
-        self.result_compton1 = model.fit(self.maximum_compton1, x = self.maximum_compton1_pulseheight, a = 10 , b = 400, c = 175, sigma = 1)
-        print(self.result_compton1.fit_report())
-        plt.plot(self.maximum_compton1_pulseheight, self.result_compton1.best_fit)
+        i = 0
+        for x in self.pulseheight_compton4:
+            if x >= 100 and x <= 160:
+                self.pulseheight.append(float(self.pulseheight_compton4[i]))
+                self.counts.append(float(self.counts_compton4[i]))
+            i += 1
+
+    def linear_func(self, x, a, b):
+        return np.e**(-a*x + b)
+
+    def linear_fit(self):
+        model = Model(self.linear_func)
+        self.result = model.fit(self.achtergrond_counts, x = self.achtergrond_pulseheight, a = -0.33, b =100)
+
+    def plotten(self):
+        print(self.result.fit_report())
+        plt.plot(self.achtergrond_pulseheight, self.result.best_fit,)
+        plt.plot(self.pulseheight, self.counts)
         plt.show()
+
+test = lineair_achtergond()
+test.select_maximum()
+test.linear_fit()
+test.plotten()
+# test.plotten()
+
+
+
+    # def plot_data(self):
+    #     plt.plot(self.pulseheight_compton1, self.counts_compton1)
+    #     plt.show()
+    
+    # def gaussian_func(self, x, a, b, c, sigma):
+    #     return a * np.exp(-(x - c) ** 2 / (2 * sigma ** 2)) + b
+    
+    # def select_maximum(self):
+    #     i = 0
+    #     self.maximum_compton1 = []
+    #     self.maximum_compton1_pulseheight = []
+    #     for x in self.pulseheight_compton1:
+    #         if x >= 158 and x <= 193:
+    #             self.maximum_compton1.append(float(self.counts_compton1[i]))
+    #             self.maximum_compton1_pulseheight.append(float(self.pulseheight_compton1[i]))
+    #         i += 1
+
+    # def gaussian_fit(self):
+    #     model = Model(self.gaussian_func)
+    #     self.result_compton1 = model.fit(self.maximum_compton1, x = self.maximum_compton1_pulseheight, a = 10 , b = 400, c = 175, sigma = 1)
+    #     print(self.result_compton1.fit_report())
+    #     plt.plot(self.maximum_compton1_pulseheight, self.result_compton1.best_fit)
+    #     plt.show()
     
 
 
