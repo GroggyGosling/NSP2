@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
+from nsp2.smoothing import savitzky_golay
 
 class FitLinearData():
 
@@ -215,8 +216,16 @@ class lineair_achtergond():
         plt.plot(self.pulseheight, self.counts)
         plt.show()
 
+    def smoothing(self):
+        x = np.array([self.achtergrond_pulseheight])
+        y = savitzky_golay(np.array([self.achtergrond_counts]),window_size= 50, order=3) 
+        plt.plot(x,y)
+        plt.show()
 
 
+
+measurements1 = lineair_achtergond()
+measurements1.smoothing
 
 
 
