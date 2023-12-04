@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
+from smoothing import savitzky_golay
 
 class FitLinearData():
 
@@ -166,8 +167,8 @@ class compton():
 class lineair_achtergond():
     def __init__(self):
     
-        self.file_background_20 = open('background_20min_30_11.csv', 'r')
-        self.file_1h = open('1h_30_11.csv', 'r')
+        self.file_background_20 = open('NSP2\\30_11\\background_20min_30_11.csv', 'r')
+        self.file_1h = open('NSP2\\30_11\\1h_30_11.csv.csv', 'r')
 
         self.pulseheight = []
         self.counts_background_20 = []
@@ -215,8 +216,17 @@ class lineair_achtergond():
         plt.plot(self.pulseheight, self.counts)
         plt.show()
 
+    
+    def smoothing(self):
+        x = np.array([self.achtergrond_pulseheight])
+        y = savitzky_golay(np.array([self.achtergrond_counts]),window_size= 50, order=3) 
+        plt.plot(x,y)
+        plt.show()
 
 
+
+measurements1 = lineair_achtergond()
+measurements1.smoothing
 
 
 

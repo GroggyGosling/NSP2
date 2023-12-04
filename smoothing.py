@@ -27,10 +27,3 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     y = np.concatenate((firstvals, y, lastvals))
     return np.convolve( m[::-1], y, mode='valid')
 
-x = np.linspace(0,2*np.pi,100)
-y = np.sin(x) + np.random.random(100) * 0.2
-yhat = savitzky_golay(y, 51, 3) # window size 51, polynomial order 3
-
-plt.plot(x,y)
-plt.plot(x,yhat, color='red')
-plt.show()
