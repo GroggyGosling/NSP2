@@ -8,7 +8,7 @@ class CrossSection():
         self.f = (hbar * alpha / m_e / c)**2 / 2
         self.l_in = np.array([])
         self.l_out = np.array([])
-        self.theta_list = np.array(np.array[])
+        self.theta_list = np.array([])
         
     def compute_cross_section(self):
          self.l_out = self.l_in + h / m_e / c * (1 - np.cos(self.theta))
