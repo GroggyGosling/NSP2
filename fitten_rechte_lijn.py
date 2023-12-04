@@ -1,7 +1,6 @@
 from lmfit import Model
 import matplotlib.pyplot as plt
 import numpy as np
-from reader import ReadData
 import csv
 
 class FitLinearData():
