@@ -28,77 +28,101 @@ class FitLinearData():
 
 class FitGaussianData():
 
-    def __init__(self, pulseheight_CS, counts_CS, pulseheight_NA, counts_NA, pulseheight_background, counts_background):
-        self.pulseheight_CS137 = pulseheight_CS
-        self.counts_CS137 = counts_CS
-        self.pulseheight_NA22 = pulseheight_NA
-        self.counts_NA22 = counts_NA
-        self.pulseheight_background = pulseheight_background
-        self.counts_background = counts_background
+    def __init__(self):
+        self.file_NA22 = open('NSP2\spectrum_NA22.csv', 'r')
+        self.file_CS137 = open('NSP2\spectrum_CS137.csv', 'r')
+        self.file_background = open('NSP2\spectrum_background.csv', 'r')
+
+        self.counts_CS137 = []
+        self.counts_NA22 = []
+        self.counts_background = []
+        self.pulseheight = []
+
+        csvreader = csv.reader(self.file_CS137)
+        for row in csvreader:
+            self.pulseheight.append(int(float(row[0])))
+            self.counts_CS137.append(int(float(row[1])))
+
+        csvreader = csv.reader(self.file_NA22)
+        for row in csvreader:
+            self.counts_NA22.append(int(float(row[1])))
+        
+        csvreader = csv.reader(self.file_background)
+        for row in csvreader:
+            self.counts_background.append(int(float(row[1])))
+       
         self.maximum_CS137_1 = []
         self.maximum_CS137_2 = []
         self.maximum_NA22_1 = []
         self.maximum_NA22_2 = []
+
         self.maximum_CS137_1_pulseheight = []
         self.maximum_CS137_2_pulseheight = []
         self.maximum_NA22_1_pulseheight = []
         self.maximum_NA22_2_pulseheight = [] 
+
         self.fit_c = []
         self.fit_c_error = []
+
+    def select_maximum(self):
+        i = 0
+        for x in self.pulseheight:
+            if x >= 120 and x <= 150:
+                self.maximum_NA22_1.append(float(self.counts_NA22[i]))
+                self.maximum_NA22_1_pulseheight.append(float(self.pulseheight[i]))
+
+            if x >= 305 and x <= 350:
+                self.maximum_NA22_2.append(float(self.counts_NA22[i]))
+                self.maximum_NA22_2_pulseheight.append(float(self.pulseheight[i]))
+
+            i += 1
+
+        i = 0
+        for x in self.pulseheight:
+            if x >= 46 and x <= 61:
+                self.maximum_CS137_1.append(float(self.counts_CS137[i]))
+                self.maximum_CS137_1_pulseheight.append(float(self.pulseheight[i]))
+
+            if x >= 143 and x <= 191:
+                self.maximum_CS137_2.append(float(self.counts_CS137[i]))
+                self.maximum_CS137_2_pulseheight.append(float(self.pulseheight[i]))
+
+            i += 1
 
     def gaussian_func(self, x, a, b, c, sigma):
         return a * np.exp(-(x - c) ** 2 / (2 * sigma ** 2)) + b
     
     def gaussian_fit(self):
         model = Model(self.gaussian_func)
-        # self.result_NA22_1 = model.fit(self.maximum_NA22_1, x = self.maximum_NA22_1_pulseheight, a = 20 , b = 1150, c = 136, sigma = 1)
-        # self.fit_c.append(self.result_NA22_1.params['c'].value)
-        # self.fit_c_error.append(self.result_NA22_1.params['c'].stderr/np.sqrt(np.sum(self.maximum_NA22_1)))
-        # print(self.result_NA22_1.fit_report())
+        self.result_NA22_1 = model.fit(self.maximum_NA22_1, x = self.maximum_NA22_1_pulseheight, a = 20 , b = 1150, c = 136, sigma = 1)
+        self.fit_c.append(self.result_NA22_1.params['c'].value)
+        self.fit_c_error.append(self.result_NA22_1.params['c'].stderr/np.sqrt(np.sum(self.maximum_NA22_1)))
 
-        # self.result_NA22_2 = model.fit(self.maximum_NA22_2, x = self.maximum_NA22_2_pulseheight, a = 1 , b = 140, c = 328, sigma = 1)
-        # self.fit_c.append(self.result_NA22_2.params['c'].value)
-        # self.fit_c_error.append(self.result_NA22_2.params['c'].stderr/np.sqrt(np.sum(self.maximum_NA22_2)))
-        # print(self.result_NA22_2.fit_report())
+        self.result_NA22_2 = model.fit(self.maximum_NA22_2, x = self.maximum_NA22_2_pulseheight, a = 1 , b = 140, c = 328, sigma = 1)
+        self.fit_c.append(self.result_NA22_2.params['c'].value)
+        self.fit_c_error.append(self.result_NA22_2.params['c'].stderr/np.sqrt(np.sum(self.maximum_NA22_2)))
 
-        # self.result_CS137_1 = model.fit(self.maximum_CS137_1, x = self.maximum_CS137_1_pulseheight, a = 10 , b = 900, c = 55, sigma = 1)
-        # self.fit_c.append(self.result_CS137_1.params['c'].value)
-        # self.fit_c_error.append(self.result_CS137_1.params['c'].stderr/np.sqrt(np.sum(self.maximum_CS137_1)))
-        # print(self.result_CS137_1.fit_report())
+        self.result_CS137_1 = model.fit(self.maximum_CS137_1, x = self.maximum_CS137_1_pulseheight, a = 10 , b = 900, c = 55, sigma = 1)
+        self.fit_c.append(self.result_CS137_1.params['c'].value)
+        self.fit_c_error.append(self.result_CS137_1.params['c'].stderr/np.sqrt(np.sum(self.maximum_CS137_1)))
 
         self.result_CS137_2 = model.fit(self.maximum_CS137_2, x = self.maximum_CS137_2_pulseheight, a = 10 , b = 2250, c = 170, sigma = 1)
         self.fit_c.append(self.result_CS137_2.params['c'].value)
         self.fit_c_error.append(self.result_CS137_2.params['c'].stderr/np.sqrt(np.sum(self.maximum_CS137_2)))
+
+        print(self.result_NA22_1.fit_report())
+        print(self.result_NA22_2.fit_report())
+        print(self.result_CS137_1.fit_report())
         print(self.result_CS137_2.fit_report())
     
         return self.fit_c, self.fit_c_error
     
-    def select_maximum(self):
-        i = 0
-        for x in self.pulseheight_NA22:
-            if x >= 120 and x <= 150:
-                self.maximum_NA22_1.append(float(self.counts_NA22[i]))
-                self.maximum_NA22_1_pulseheight.append(float(self.pulseheight_NA22[i]))
-            if x >= 305 and x <= 350:
-                self.maximum_NA22_2.append(float(self.counts_NA22[i]))
-                self.maximum_NA22_2_pulseheight.append(float(self.pulseheight_NA22[i]))
-            i += 1
-        i = 0
-        for x in self.pulseheight_CS137:
-            if x >= 46 and x <= 61:
-                self.maximum_CS137_1.append(float(self.counts_CS137[i]))
-                self.maximum_CS137_1_pulseheight.append(float(self.pulseheight_CS137[i]))
-            if x >= 143 and x <= 191:
-                self.maximum_CS137_2.append(float(self.counts_CS137[i]))
-                self.maximum_CS137_2_pulseheight.append(float(self.pulseheight_CS137[i]))
-            i += 1
-    
     def plot_data(self):
-        plt.plot(self.pulseheight_NA22, self.counts_NA22)
+        plt.plot(self.pulseheight, self.counts_NA22)
         plt.show()
-        plt.plot(self.pulseheight_CS137, self.counts_CS137)
+        plt.plot(self.pulseheight, self.counts_CS137)
         plt.show()
-        plt.plot(self.pulseheight_background, self.counts_background)
+        plt.plot(self.pulseheight, self.counts_background)
         plt.show()
 
 class compton():
