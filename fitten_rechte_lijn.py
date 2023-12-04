@@ -7,7 +7,7 @@ theoretical__pulse_height = np.array([0,1,2]) #mV
 
 
 def func(x,a,b):
-    y = np.exp(a*x) + b
+    y = a*x + b
     return y 
 model = Model(func)
 
