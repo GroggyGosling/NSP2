@@ -29,9 +29,9 @@ class FitLinearData():
 class FitGaussianData():
 
     def __init__(self):
-        self.file_NA22 = open('NSP2\spectrum_NA22.csv', 'r')
-        self.file_CS137 = open('NSP2\spectrum_CS137.csv', 'r')
-        self.file_background = open('NSP2\spectrum_background.csv', 'r')
+        self.file_NA22 = open('NSP2\data\calibratie\spectrum_NA22.csv', 'r')
+        self.file_CS137 = open('NSP2\data\calibratiespectrum_CS137.csv', 'r')
+        self.file_background = open('NSP2\data\calibratiespectrum_background.csv', 'r')
 
         self.counts_CS137 = []
         self.counts_NA22 = []
@@ -129,8 +129,8 @@ class FitGaussianData():
 class compton():
 
     def __init__(self):
-        self.file_background_20 = open('30_11\\background_20min_30_11.csv', 'r')
-        self.file_1h = open('30_11\\1h_30_11.csv', 'r')
+        self.file_background_20 = open('NSP2\\data\\30_11\\background_20min_30_11.csv', 'r')
+        self.file_1h = open('NSP2\\data\\30_11\\1h_30_11.csv', 'r')
 
         self.pulseheight = []
 
@@ -166,8 +166,8 @@ class compton():
 class lineair_achtergond():
     def __init__(self):
     
-        self.file_background_20 = open('background_20min_30_11.csv', 'r')
-        self.file_1h = open('1h_30_11.csv', 'r')
+        self.file_background_20 = open('NSP2\\data\\30_11\\background_20min_30_11.csv', 'r')
+        self.file_1h = open('NSP2\\data\\30_11\\1h_30_11.csv', 'r')
 
         self.pulseheight = []
         self.counts_background_20 = []
@@ -214,7 +214,6 @@ class lineair_achtergond():
         plt.plot(self.achtergrond_pulseheight, self.result.best_fit,)
         plt.plot(self.pulseheight, self.counts)
         plt.show()
-
 
 
 
