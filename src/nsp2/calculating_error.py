@@ -15,6 +15,6 @@ def err_foton_energy(err_theta,theta,E_f):
 def err_mili_voltage(err_foton_energy):
     return ((err_foton_energy/(1.602*10**-16))/3.97)
 
-test = err_foton_energy(3,35.0,662*(1.602*10**-16))
+test = err_foton_energy(90,35.0,662*(1.602*10**-16))
 yes = err_mili_voltage(test)
 print(yes)
