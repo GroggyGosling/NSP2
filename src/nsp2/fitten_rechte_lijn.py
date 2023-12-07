@@ -145,8 +145,8 @@ class FitGaussianData():
 class compton():
 
     def __init__(self):
-        # self.file_background_20 = open('data\\04_12\\background_20m_45d_4_12.csv', 'r')
-        # self.file_1h = open('data\\04_12\\1h_45d_4_12.csv', 'r')
+        # self.file_background_20 = open('data\\7_12\\background_20m_35d_7_12.csv', 'r')
+        # self.file_1h = open('data\\7_12\\1h_35d_7_12.csv', 'r')
         self.file_background_20 = open('data\\30_11\\background_20min_30_11.csv', 'r')
         self.file_1h = open('data\\30_11\\1h_30_11.csv', 'r')
 
@@ -255,4 +255,4 @@ fit.plot_data()
 
 
 
-print("hello world")
+ 
